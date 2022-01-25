@@ -88,16 +88,8 @@ app.get('/login', (req, res) => {
   }))
 })
 
-app.get('/:slug', function (req, res, next) {
-  let slug = req.params.slug
-  slug = slug.toLowerCase()
-
-  const real_path = req.query.real_path
-  if (typeof real_path === 'string' && real_path !== '') {
-    next('route')
-  } else if (slug === 'edit'&& slug === 'view') {
-    next('route')
-  } else {
+async function getBlockBySlug(slug, headers = {}) {
+  return new Promise(resolve => {
     fetch((
       isDevEnvironment
       ? 'http://localhost:4004/graphql/v1/'
@@ -105,9 +97,10 @@ app.get('/:slug', function (req, res, next) {
     ), {
       method: 'POST',
       body: JSON.stringify({
-        query: `query getBlockBySlug ($slug: String!) {
-          blockBySlug (slug: $slug) {
+        query: `query ($slug: String!) {
+          block: blockBySlug (slug: $slug) {
     	  	  _id
+            properties
           }
         }`,
         variables: {
@@ -115,7 +108,8 @@ app.get('/:slug', function (req, res, next) {
         }
       }),
       headers: {
-        'content-type': 'application/json'
+        ...headers,
+        'content-type': 'application/json',
       }
     })
     .then(async data => {
@@ -123,18 +117,186 @@ app.get('/:slug', function (req, res, next) {
       if (
         data
         && data.data
-        && data.data.blockBySlug
-        && data.data.blockBySlug._id
+        && data.data.block
       ) {
-        res.redirect(`?real_path=/view/${data.data.blockBySlug._id}`)
+        resolve(data.data.block)
       } else {
-        next('route')
+        resolve(null)
       }
     })
+    .catch(error => {
+      console.error(error)
+      resolve(null)
+    })
+  })
+}
+
+async function getBlockById(id, headers = {}) {
+  return new Promise(resolve => {
+    fetch((
+      isDevEnvironment
+      ? 'http://localhost:4004/graphql/v1/'
+      : 'http://api.volt.link/graphql/v1/'
+    ), {
+      method: 'POST',
+      body: JSON.stringify({
+        query: `query ($_id: ObjectID!) {
+          block (_id: $_id) {
+    	  	  _id
+            properties
+          }
+        }`,
+        variables: {
+          _id: id,
+        }
+      }),
+      headers: {
+        ...headers,
+        'content-type': 'application/json',
+      }
+    })
+    .then(async data => {
+      data = await data.json()
+      if (
+        data
+        && data.data
+        && data.data.block
+      ) {
+        resolve(data.data.block)
+      } else {
+        resolve(null)
+      }
+    })
+    .catch(error => {
+      console.error(error)
+      resolve(null)
+    })
+  })
+}
+
+async function getBlockBySlugOrId(slugOrId, headers = {}) {
+  let block = await getBlockBySlug(slugOrId, headers)
+  if (block) {
+    return {
+      block,
+      used_query: 'slug',
+    }
+  } else {
+    block = await getBlockById(slugOrId, headers)
+    return {
+      block,
+      used_query: 'id',
+    }
+  }
+}
+
+function normalizeSlug(slug){
+  if (typeof slug === 'string') {
+    return slug.toLowerCase()
+  }
+
+  return null
+}
+
+function showClient(res){
+  // send index file to show client
+  res.sendFile(static_files_path+'/index.html')
+  // The client needs to check if the block exists OR if a error page should be shown.
+  // AND the client should to correct the slug if it's wrong.
+  // (TODO: There currently is no function to find the correct slug from an id.)
+}
+
+function redirectSlug(options) {
+  const {
+    block,
+    res,
+    req,
+  } = options
+
+  const group0 = req.params[0] // slug (or id if group1 is empty) // capture-group before separator
+  // const group1 = req.params[1] // id // capture-group after separator
+  const group2 = req.params[2] // suffix
+
+
+  if (
+    !!block
+    && block.hasOwnProperty('properties')
+    && block.properties.hasOwnProperty('action')
+    && block.properties.action.hasOwnProperty('type')
+  ) {
+    if (block.properties.action.type === 'render_block') {
+      if (block.properties.action.blockId) {
+        // render block of blockId
+        res.redirect(`/${group0}=${block.properties.action.blockId}${group2}`)
+      } else {
+        // render this block
+        res.redirect(`/${group0}=${block._id}${group2}`)
+      }
+    } else if (
+      block.properties.action.type === 'open_url'
+      && typeof block.properties.action.url === 'string'
+      && block.properties.action.url !== ''
+    ) {
+      // go to mentioned url
+      res.redirect(block.properties.action.url)
+    } else {
+      // error (handles by client)
+      showClient(res)
+    }
+  } else {
+    // error (handles by client)
+    showClient(res)
+  }
+
+}
+
+app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
+  const headers = {
+    cookie: req.headers.cookie, // for authentication
+    'user-agent': req.headers['user-agent'], // for analytics
+    referer: req.headers.referer, // for analytics
+  }
+  
+  const group0 = req.params[0] // slug (or id if group1 is empty) // capture-group before separator
+  const group1 = req.params[1] // id // capture-group after separator
+  // const group2 = req.params[2] // suffix
+
+  if (!!group0 && !group1) {
+    // check if group0 is ID by finding it in the database
+    const block = await getBlockById(group0, headers)
+    if (block) {
+      // group0 is an ID
+      showClient(res)
+    } else {
+      // group0 is not an id
+      // check if group0 is a slug
+      const block = await getBlockBySlug(group0, headers)
+      if (block) {
+        // group0 is a slug
+        // redirect it accoringly
+        // TODO: Here is the place to add in the automations and actions for the path trigger.
+        redirectSlug({
+          block,
+          req,
+          res,
+        })
+      } else {
+        // captureGroupBeforeSeparator is probably a file. Not a slug or id.
+        // So go to the next route.
+        // The next route shows static files.
+        next('route')
+      }
+    }
+  } else {
+    showClient(res)
   }
 })
 
 app.use(express.static(static_files_path))
+
+app.get('*', function (req, res, next) {
+  res.sendFile(static_files_path+'/index.html')
+})
 
 const port = 3000
 const host = '0.0.0.0' // Uberspace wants 0.0.0.0
