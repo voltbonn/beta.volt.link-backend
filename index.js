@@ -93,7 +93,7 @@ async function getBlockBySlug(slug, headers = {}) {
     fetch((
       isDevEnvironment
       ? 'http://localhost:4004/graphql/v1/'
-      : 'http://api.volt.link/graphql/v1/'
+      : 'https://api.volt.link/graphql/v1/'
     ), {
       method: 'POST',
       body: JSON.stringify({
@@ -136,7 +136,7 @@ async function getBlockById(id, headers = {}) {
     fetch((
       isDevEnvironment
       ? 'http://localhost:4004/graphql/v1/'
-      : 'http://api.volt.link/graphql/v1/'
+      : 'https://api.volt.link/graphql/v1/'
     ), {
       method: 'POST',
       body: JSON.stringify({
