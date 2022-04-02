@@ -298,7 +298,7 @@ app.get('*', function (req, res, next) {
   res.sendFile(static_files_path+'/index.html')
 })
 
-const port = 3000
+const port = 4003
 const host = '0.0.0.0' // Uberspace wants 0.0.0.0
 http.createServer(app).listen({ port, host }, () =>
   console.info(`
