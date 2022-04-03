@@ -13,8 +13,8 @@ const { fetch } = require('cross-fetch')
 
 const static_files_path = path.join(__dirname,
   isDevEnvironment
-  ? '../edit.volt.link/build/'
-  : '../beta.volt.link/'
+    ? '../volt.link-frontend/build/'
+  : '../volt.link-frontend/'
 )
 
 function checkOrigin(origin){
