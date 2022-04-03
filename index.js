@@ -222,9 +222,23 @@ function redirectSlug(options) {
   const group2 = req.params[2] // suffix
 
 
+  if (!block.hasOwnProperty('properties')) {
+    block.properties = {}
+  }
+
+  if (
+    ! (
+      block.properties.hasOwnProperty('action')
+      && block.properties.action.hasOwnProperty('type')
+    )
+  ) {
+    block.properties.action = {
+      type: 'render_block',
+    }
+  }
+
   if (
     !!block
-    && block.hasOwnProperty('properties')
     && block.properties.hasOwnProperty('action')
     && block.properties.action.hasOwnProperty('type')
   ) {
