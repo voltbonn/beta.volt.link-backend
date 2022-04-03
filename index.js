@@ -210,7 +210,6 @@ function showClient(res){
 }
 
 function redirectSlug(options) {
-  console.log('redirectSlug', options)
   const {
     block,
     res,
@@ -220,7 +219,6 @@ function redirectSlug(options) {
   const group0 = req.params[0] // slug (or id if group1 is empty) // capture-group before separator
   // const group1 = req.params[1] // id // capture-group after separator
   const group2 = req.params[2] // suffix
-
 
   if (!block.hasOwnProperty('properties')) {
     block.properties = {}
