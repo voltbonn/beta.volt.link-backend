@@ -280,7 +280,6 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
   if (!!group0 && !group1) {
     // check if group0 is ID by finding it in the database
     const block = await getBlockById(group0, headers)
-    console.log('getBlockById-block', block)
     if (block) {
       // group0 is an ID
       showClient(res)
@@ -288,7 +287,6 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       // group0 is not an id
       // check if group0 is a slug
       const block = await getBlockBySlug(group0, headers)
-      console.log('getBlockBySlug-block', block)
       if (block) {
         // group0 is a slug
         // redirect it accoringly
