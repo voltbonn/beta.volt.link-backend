@@ -22,7 +22,7 @@ function checkOrigin(origin){
     typeof origin === 'string'
     && (
       origin === 'volt.link'
-      || origin.endsWith('volt.link')
+      || origin.endsWith('://volt.link')
 
       // allow from subdomains
       || origin.endsWith('.volt.link')
