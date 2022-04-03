@@ -210,6 +210,7 @@ function showClient(res){
 }
 
 function redirectSlug(options) {
+  console.log('redirectSlug', options)
   const {
     block,
     res,
