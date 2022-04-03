@@ -21,8 +21,11 @@ function checkOrigin(origin){
   return (
     typeof origin === 'string'
     && (
+      origin === 'volt.link'
+      || origin.endsWith('volt.link')
+
       // allow from subdomains
-      origin.endsWith('.volt.link')
+      || origin.endsWith('.volt.link')
 
       // allow for localhost
       || origin.endsWith('localhost:3000')
