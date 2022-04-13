@@ -11,6 +11,9 @@ const RateLimit = require('express-rate-limit')
 
 const { fetch } = require('cross-fetch')
 
+const fs = require('fs')
+
+
 const static_files_path = path.join(__dirname,
   isDevEnvironment
     ? '../volt.link-frontend/build/'
@@ -81,8 +84,6 @@ app.options("/*", function (req, res, next) {
     res.sendStatus(403)
   }
 })
-
-app.use(express.static(static_files_path))
 
 app.get('/login', (req, res) => {
   res.redirect(url.format({
@@ -201,9 +202,64 @@ function normalizeSlug(slug){
   return null
 }
 
-function showClient(res){
+function getImageUrl(imageObj) {
+  if (
+    typeof imageObj === 'object'
+    && imageObj !== null
+    && !Array.isArray(imageObj)
+  ) {
+    if (imageObj.type === 'url') {
+      return imageObj.url || ''
+    }
+  }
+
+  return ''
+}
+
+function showClient(res, block) {
   // send index file to show client
-  res.sendFile(static_files_path+'/index.html')
+  const index_file_path = static_files_path + '/index.html'
+
+  // load index file
+  fs.readFile(index_file_path, 'utf8', function (err, index_file) {
+    if (err) {
+      console.error(err)
+      res.sendStatus(500)
+    } else {
+      let title = 'VoltLink'
+      let description = 'VoltLink is an information-hub about Volt Europa.'
+      let coverphoto_url = ''
+
+      if (block && block.hasOwnProperty('properties')) {
+        if (
+          typeof block.properties.text === 'string'
+          && block.properties.text.length > 0
+        ) {
+          title = block.properties.text
+        }
+
+        coverphoto_url = getImageUrl(block.properties.coverphoto)
+        if (!coverphoto_url) {
+          coverphoto_url = getImageUrl(block.properties.icon)
+        }
+      }
+
+      if (coverphoto_url !== '') {
+        coverphoto_url = `https://api.volt.link/download_url?f=jpg&w=1000&h=1000&url=${encodeURIComponent(coverphoto_url)}`
+      }
+
+      index_file = index_file
+        .replace(/__META_TITLE__/g, title)
+        .replace(/__META_DESCRIPTION__/g, description)
+        .replace(/__META_COVERPHOTO__/g, coverphoto_url)
+        // .replace(/__SERVER_DATA__/g, JSON.stringify({
+        //   block: block,
+        // }))
+
+      res.send(index_file)
+    }
+  })
+
   // The client needs to check if the block exists OR if a error page should be shown.
   // AND the client should to correct the slug if it's wrong.
   // (TODO: There currently is no function to find the correct slug from an id.)
@@ -257,11 +313,11 @@ function redirectSlug(options) {
       res.redirect(block.properties.action.url)
     } else {
       // error (handles by client)
-      showClient(res)
+      showClient(res, block)
     }
   } else {
     // error (handles by client)
-    showClient(res)
+    showClient(res, block)
   }
 
 }
@@ -277,12 +333,15 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
   const group1 = req.params[1] // id // capture-group after separator
   // const group2 = req.params[2] // suffix
 
-  if (!!group0 && !group1) {
+  if (!!group0 && !!group1) {
+    const block = await getBlockById(group1, headers)
+    showClient(res, block)
+  } else if (!!group0 && !group1) {
     // check if group0 is ID by finding it in the database
     const block = await getBlockById(group0, headers)
     if (block) {
       // group0 is an ID
-      showClient(res)
+      showClient(res, block)
     } else {
       // group0 is not an id
       // check if group0 is a slug
@@ -311,7 +370,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
 app.use(express.static(static_files_path))
 
 app.get('*', function (req, res, next) {
-  res.sendFile(static_files_path+'/index.html')
+  showClient(res) // show index.html as a fallback
 })
 
 const port = 4003
