@@ -236,6 +236,7 @@ function showClient(res, block) {
           && block.properties.text.length > 0
         ) {
           title = block.properties.text
+          description = ''
         }
 
         coverphoto_url = getImageUrl(block.properties.coverphoto)
