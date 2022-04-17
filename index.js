@@ -330,13 +330,16 @@ function redirectSlug(options) {
 }
 
 let static_files_cache = null
-async function isStaticFile(slug) {
+async function getIsStaticFile(slug) {
   if (static_files_cache === null) {
     const filenames = fs.readdirSync(static_files_path)
       .map(filename => normalizeSlug(filename))
 
     static_files_cache = filenames
-  } else {
+  }
+  
+  if (static_files_cache !== null) {
+    slug = normalizeSlug(slug)
     return static_files_cache.includes(slug)
   }
   
@@ -367,8 +370,8 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       // group0 is not an id
       // check if group0 is a slug
 
-      const slug = normalizeSlug(group0)
-      if (await isStaticFile(slug)) {
+      const isStaticFile = await getIsStaticFile(group0)
+      if (isStaticFile === true) {
         // captureGroupBeforeSeparator is a file. Not a slug or id.
         // So go to the next route.
         // The next route shows static files.
