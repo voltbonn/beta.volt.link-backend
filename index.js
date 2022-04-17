@@ -92,7 +92,7 @@ app.get('/login', (req, res) => {
   }))
 })
 
-const blockQuery = `
+const blockQueryWithChildren = `
   _id
   type
   properties
