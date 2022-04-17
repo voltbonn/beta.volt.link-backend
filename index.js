@@ -92,6 +92,43 @@ app.get('/login', (req, res) => {
   }))
 })
 
+const blockQuery = `
+  _id
+  type
+  properties
+  content {
+    blockId
+    block {
+      _id
+      type
+      properties
+      content {
+        blockId
+      }
+      parent
+      metadata {
+        modified
+        modified_by
+      }
+      permissions
+      computed {
+        roles
+        inherited_block_permissions
+      }
+    }
+  }
+  parent
+  metadata {
+    modified
+    modified_by
+  }
+  permissions
+  computed {
+    roles
+    inherited_block_permissions
+  }
+`
+
 async function getBlockBySlug(slug, headers = {}) {
   return new Promise(resolve => {
     fetch((
@@ -103,8 +140,7 @@ async function getBlockBySlug(slug, headers = {}) {
       body: JSON.stringify({
         query: `query ($slug: String!) {
           block: blockBySlug (slug: $slug) {
-    	  	  _id
-            properties
+      		  ${blockQuery}
           }
         }`,
         variables: {
@@ -146,8 +182,7 @@ async function getBlockById(id, headers = {}) {
       body: JSON.stringify({
         query: `query ($_id: ObjectID!) {
           block (_id: $_id) {
-    	  	  _id
-            properties
+      		  ${blockQuery}
           }
         }`,
         variables: {
