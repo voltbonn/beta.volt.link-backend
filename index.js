@@ -329,6 +329,24 @@ function redirectSlug(options) {
 
 }
 
+const static_files = [
+  'static',
+  'public',
+  'ubuntu',
+  'favicon.ico',
+  'index.html',
+  'manifest.json',
+  'modernizr.js',
+  'robots.txt',
+  'volt-logo-white-64.png',
+  'volt-logo-white-192.png',
+  'volt-logo-white-512.png',
+]
+
+async function isStaticFile(slug) {
+  return static_files.includes(slug)
+}
+
 app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
   const headers = {
     cookie: req.headers.cookie, // for authentication
@@ -352,21 +370,30 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
     } else {
       // group0 is not an id
       // check if group0 is a slug
-      const block = await getBlockBySlug(group0, headers)
-      if (block) {
-        // group0 is a slug
-        // redirect it accoringly
-        // TODO: Here is the place to add in the automations and actions for the path trigger.
-        redirectSlug({
-          block,
-          req,
-          res,
-        })
-      } else {
-        // captureGroupBeforeSeparator is probably a file. Not a slug or id.
+
+      const slug = normalizeSlug(group0)
+      if (await isStaticFile(slug)) {
+        // captureGroupBeforeSeparator is a file. Not a slug or id.
         // So go to the next route.
         // The next route shows static files.
         next('route')
+      } else {
+        const block = await getBlockBySlug(group0, headers)
+        if (block) {
+          // group0 is a slug
+          // redirect it accoringly
+          // TODO: Here is the place to add in the automations and actions for the path trigger.
+          redirectSlug({
+            block,
+            req,
+            res,
+          })
+        } else {
+          // captureGroupBeforeSeparator is probably a file. Not a slug or id.
+          // So go to the next route.
+          // The next route shows static files.
+          next('route')
+        }
       }
     }
   } else {
