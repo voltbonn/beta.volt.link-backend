@@ -17,7 +17,7 @@ const fs = require('fs')
 const static_files_path = path.join(__dirname,
   isDevEnvironment
     ? '../volt.link-frontend/build/'
-  : '../volt.link-frontend/'
+    : '../volt.link-frontend/'
 )
 
 function checkOrigin(origin){
