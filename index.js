@@ -129,6 +129,12 @@ const blockQuery = `
   }
 `
 
+const blockQuery = `
+  _id
+  type
+  properties
+`
+
 async function getBlockBySlug(slug, headers = {}) {
   return new Promise(resolve => {
     fetch((
@@ -276,7 +282,9 @@ function showClient(res, block) {
         coverphoto_url = `https://api.volt.link/download_url?f=jpg&w=1000&h=1000&url=${encodeURIComponent(coverphoto_url)}`
       }
 
-      const __SERVER_DATA__ = "JSON.parse(" + JSON.stringify(JSON.stringify({ preloaded_block: block })) + ")" // First stringify is to get arrays and objects represented correctly. Second stringify+parse to ease parsing of js code on the client.
+      // const __SERVER_DATA__ = "JSON.parse(" + JSON.stringify(JSON.stringify({ preloaded_block: block })) + ")" // First stringify is to get arrays and objects represented correctly. Second stringify+parse to ease parsing of js code on the client.
+      
+      const __SERVER_DATA__ = "JSON.parse(" + JSON.stringify(JSON.stringify({ preloaded_block: null })) + ")" // First stringify is to get arrays and objects represented correctly. Second stringify+parse to ease parsing of js code on the client.
 
       index_file = index_file
         .replace(/__META_TITLE__/g, title)
