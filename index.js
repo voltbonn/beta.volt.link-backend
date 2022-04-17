@@ -194,14 +194,6 @@ async function getBlockBySlugOrId(slugOrId, headers = {}) {
   }
 }
 
-function normalizeSlug(slug){
-  if (typeof slug === 'string') {
-    return slug.toLowerCase()
-  }
-
-  return null
-}
-
 function getImageUrl(imageObj) {
   if (
     typeof imageObj === 'object'
@@ -266,6 +258,19 @@ function showClient(res, block) {
   // (TODO: There currently is no function to find the correct slug from an id.)
 }
 
+function normalizeSlug(slug) {
+  if (typeof slug === 'string') {
+    slug = slug
+      .trim()
+      .toLowerCase()
+    // .replace(/_/g, '-')
+
+    return slug
+  }
+
+  return null
+}
+
 function redirectSlug(options) {
   const {
     block,
@@ -298,12 +303,13 @@ function redirectSlug(options) {
     && block.properties.action.hasOwnProperty('type')
   ) {
     if (block.properties.action.type === 'render_block') {
+      const slug = normalizeSlug(group0)
       if (block.properties.action.blockId) {
         // render block of blockId
-        res.redirect(`/${group0}=${block.properties.action.blockId}${group2}`)
+        res.redirect(`/${slug}=${block.properties.action.blockId}${group2}`)
       } else {
         // render this block
-        res.redirect(`/${group0}=${block._id}${group2}`)
+        res.redirect(`/${slug}=${block._id}${group2}`)
       }
     } else if (
       block.properties.action.type === 'open_url'
