@@ -329,22 +329,18 @@ function redirectSlug(options) {
 
 }
 
-const static_files = [
-  'static',
-  'public',
-  'ubuntu',
-  'favicon.ico',
-  'index.html',
-  'manifest.json',
-  'modernizr.js',
-  'robots.txt',
-  'volt-logo-white-64.png',
-  'volt-logo-white-192.png',
-  'volt-logo-white-512.png',
-]
-
+let static_files_cache = null
 async function isStaticFile(slug) {
-  return static_files.includes(slug)
+  if (static_files_cache === null) {
+    const filenames = fs.readdirSync(static_files_path)
+      .map(filename => normalizeSlug(filename))
+
+    static_files_cache = filenames
+  } else {
+    return static_files_cache.includes(slug)
+  }
+  
+  return false
 }
 
 app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
