@@ -303,7 +303,7 @@ function redirectSlug(options) {
     && block.properties.action.hasOwnProperty('type')
   ) {
     if (block.properties.action.type === 'render_block') {
-      const slug = normalizeSlug(group0)
+      const slug = normalizeSlug(group0) || group0
       if (block.properties.action.blockId) {
         // render block of blockId
         res.redirect(`/${slug}=${block.properties.action.blockId}${group2}`)
