@@ -314,10 +314,10 @@ function normalizeSlug(slug) {
 
 function redirectSlug(options) {
   const {
-    block,
+    block = {},
     res,
     req,
-  } = options
+  } = options || {}
 
   const group0 = req.params[0] // slug (or id if group1 is empty) // capture-group before separator
   // const group1 = req.params[1] // id // capture-group after separator
