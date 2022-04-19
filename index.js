@@ -376,18 +376,43 @@ function redirectSlug(options) {
 let static_files_cache = null
 async function getIsStaticFile(slug) {
   if (static_files_cache === null) {
-    const filenames = fs.readdirSync(static_files_path)
-      .map(filename => normalizeSlug(filename))
+    const filenames = fs.readdirSync(static_files_path, { withFileTypes: true })
+      .map(({ name: filename }) => normalizeSlug(filename))
 
-    static_files_cache = filenames
+    const filetypes = fs.readdirSync(static_files_path, { withFileTypes: true })
+      .reduce((filetypes, fileinfos) => {
+        filetypes[fileinfos.name] = {
+          isFile: fileinfos.isFile(),
+        }
+        return filetypes
+      }, {})
+
+    static_files_cache = {
+      filenames,
+      filetypes,
+    }
   }
   
   if (static_files_cache !== null) {
     slug = normalizeSlug(slug)
-    return static_files_cache.includes(slug)
+
+    const isStaticFile = static_files_cache.filenames.includes(slug)
+
+    let isFile = false
+    if (static_files_cache.filetypes.hasOwnProperty(slug)) {
+      isFile = static_files_cache.filetypes[slug].isFile
+    }
+
+    return {
+      isStaticFile,
+      isFile,
+    }
   }
   
-  return false
+  return {
+    isStaticFile: false,
+    isFile: false,
+  }
 }
 
 app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
@@ -401,12 +426,19 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
   const group1 = req.params[1] // id // capture-group after separator
   // const group2 = req.params[2] // suffix
 
-  const isStaticFile = await getIsStaticFile(group0)
+  const {
+    isStaticFile,
+    isFile,
+  } = await getIsStaticFile(group0)
   if (isStaticFile === true) {
     // captureGroupBeforeSeparator is a file. Not a slug or id.
-    // So go to the next route.
-    // The next route shows static files.
-    next('route')
+    if (isFile === true) {
+      res.sendFile(static_files_path + group0)
+    } else{
+      // Go to the next route.
+      // The next route shows static files.
+      next('route')
+    }
   } else {
     if (!!group0 && !!group1) {
       const block = await getBlockById(group1, headers)
