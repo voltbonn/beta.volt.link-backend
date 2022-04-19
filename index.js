@@ -435,6 +435,11 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
   if (isStaticFile === true) {
     // captureGroupBeforeSeparator is a file. Not a slug or id.
     if (isFile === true) {
+      console.log('static_files_path', static_files_path)
+      console.log('group0', group0)
+      console.log('static_files_path + group0', static_files_path + group0)
+      console.log('path.join(static_files_path, group0)', path.join(static_files_path, group0))
+      // res.sendFile(path.join(static_files_path, group0))
       res.sendFile(static_files_path + group0)
     } else{
       // Go to the next route.
