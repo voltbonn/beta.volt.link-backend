@@ -257,9 +257,15 @@ function showClient(res, block) {
       let description = 'VoltLink is an information-hub about Volt Europa.'
       let coverphoto_url = ''
 
-      if (block && block.hasOwnProperty('properties')) {
+      if (
+        block
+        && block.hasOwnProperty('properties')
+        && typeof block.properties === 'object'
+        && block.properties !== null
+      ) {
         if (
-          typeof block.properties.text === 'string'
+          block.properties.hasOwnProperty('text')
+          && typeof block.properties.text === 'string'
           && block.properties.text.length > 0
         ) {
           title = block.properties.text
