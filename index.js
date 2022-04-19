@@ -323,6 +323,9 @@ function redirectSlug(options) {
   // const group1 = req.params[1] // id // capture-group after separator
   const group2 = req.params[2] // suffix
 
+  if (!block.type) {
+    block.type = 'page'
+  }
   if (!block.hasOwnProperty('properties')) {
     block.properties = {}
   }
