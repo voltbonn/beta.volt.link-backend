@@ -401,26 +401,26 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
   const group1 = req.params[1] // id // capture-group after separator
   // const group2 = req.params[2] // suffix
 
-  if (!!group0 && !!group1) {
-    const block = await getBlockById(group1, headers)
-    showClient(res, block)
-  } else if (!!group0 && !group1) {
-    // check if group0 is ID by finding it in the database
-    const block = await getBlockById(group0, headers)
-    if (block) {
-      // group0 is an ID
+  const isStaticFile = await getIsStaticFile(group0)
+  if (isStaticFile === true) {
+    // captureGroupBeforeSeparator is a file. Not a slug or id.
+    // So go to the next route.
+    // The next route shows static files.
+    next('route')
+  } else {
+    if (!!group0 && !!group1) {
+      const block = await getBlockById(group1, headers)
       showClient(res, block)
-    } else {
-      // group0 is not an id
-      // check if group0 is a slug
-
-      const isStaticFile = await getIsStaticFile(group0)
-      if (isStaticFile === true) {
-        // captureGroupBeforeSeparator is a file. Not a slug or id.
-        // So go to the next route.
-        // The next route shows static files.
-        next('route')
+    } else if (!!group0 && !group1) {
+      // check if group0 is ID by finding it in the database
+      const block = await getBlockById(group0, headers)
+      if (block) {
+        // group0 is an ID
+        showClient(res, block)
       } else {
+        // group0 is not an id
+        // check if group0 is a slug
+
         const block = await getBlockBySlug(group0, headers)
         if (block) {
           // group0 is a slug
@@ -438,9 +438,9 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
           next('route')
         }
       }
+    } else {
+      showClient(res)
     }
-  } else {
-    showClient(res)
   }
 })
 
