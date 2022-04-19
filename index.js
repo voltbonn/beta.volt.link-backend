@@ -73,7 +73,6 @@ app.use(function (req, res, next) {
 })
 
 app.options("/*", function (req, res, next) {
-  console.log('req.url', req.url)
   // correctly response for cors
   if (req.is_subdomain) {
     res.setHeader('Access-Control-Allow-Origin', req.origin)
@@ -422,7 +421,7 @@ console.log('')
 console.log('static_files_path', static_files_path)
 console.log('')
 
-app.get(/(.*)/, async function (req, res, next) {
+app.get("/modernizr.js", async function (req, res, next) {
   console.log('')
   console.log('req.url', req.url)
   console.log('req.params', req.params)
