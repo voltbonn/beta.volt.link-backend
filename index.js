@@ -391,6 +391,8 @@ async function getIsStaticFile(slug) {
       filenames,
       filetypes,
     }
+
+    console.log('static_files_cache', JSON.stringify(static_files_cache, null, 2))
   }
   
   if (static_files_cache !== null) {
