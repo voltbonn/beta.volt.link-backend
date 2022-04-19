@@ -422,12 +422,17 @@ console.log('static_files_path', static_files_path)
 console.log('')
 
 app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
+  console.log('------------------------------------------------------')
+
   const headers = {
     cookie: req.headers.cookie, // for authentication
     'user-agent': req.headers['user-agent'], // for analytics
     referer: req.headers.referer, // for analytics
   }
-  
+
+  console.log('')
+  console.log('req.params', req.params)
+
   const group0 = req.params[0] // slug (or id if group1 is empty) // capture-group before separator
   const group1 = req.params[1] // id // capture-group after separator
   // const group2 = req.params[2] // suffix
@@ -436,8 +441,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
     isStaticFile,
     isFile,
   } = await getIsStaticFile(group0)
-  console.log('')
-  console.log('group0', group0)
+
   console.log('isStaticFile', isStaticFile)
 
   if (isStaticFile === true) {
