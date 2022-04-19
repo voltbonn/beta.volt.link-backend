@@ -73,6 +73,7 @@ app.use(function (req, res, next) {
 })
 
 app.options("/*", function (req, res, next) {
+  console.log('req.url', req.url)
   // correctly response for cors
   if (req.is_subdomain) {
     res.setHeader('Access-Control-Allow-Origin', req.origin)
