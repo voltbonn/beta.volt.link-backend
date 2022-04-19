@@ -421,6 +421,14 @@ console.log('')
 console.log('static_files_path', static_files_path)
 console.log('')
 
+app.get(/(.*)/, async function (req, res, next) {
+  console.log('')
+  console.log('req.url', req.url)
+  console.log('req.params', req.params)
+  console.log('')
+  next('route')
+})
+
 app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
   console.log('------------------------------------------------------')
 
