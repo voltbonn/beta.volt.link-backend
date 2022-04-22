@@ -426,6 +426,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
   const group1 = req.params[1] // id // capture-group after separator
   // const group2 = req.params[2] // suffix
 
+
   const {
     isStaticFile,
     isFile,
@@ -435,7 +436,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
     // captureGroupBeforeSeparator is a file. Not a slug or id.
     if (isFile === true) {
       res.sendFile(static_files_path + group0)
-    } else{
+    } else {
       // Go to the next route.
       // The next route shows static files.
       next('route')
