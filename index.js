@@ -323,6 +323,8 @@ function redirectSlug(options) {
   // const group1 = req.params[1] // id // capture-group after separator
   const group2 = req.params[2] // suffix
 
+  const slug = normalizeSlug(group0)
+
   if (!block.type) {
     block.type = 'page'
   }
@@ -330,47 +332,35 @@ function redirectSlug(options) {
     block.properties = {}
   }
 
-  if (
-    ! (
-      block.properties.hasOwnProperty('action')
-      && block.properties.action.hasOwnProperty('type')
-    )
-  ) {
-    block.properties.action = {
-      type: 'render_block',
-    }
-  }
+  let performedAction = false
 
-  if (
-    !!block
-    && block.properties.hasOwnProperty('action')
-    && block.properties.action.hasOwnProperty('type')
-  ) {
-    if (block.properties.action.type === 'render_block') {
-      const slug = normalizeSlug(group0) || group0
-      if (block.properties.action.blockId) {
-        // render block of blockId
-        res.redirect(`/${slug}=${block.properties.action.blockId}${group2}`)
-      } else {
-        // render this block
-        res.redirect(`/${slug}=${block._id}${group2}`)
+  if (block.type === 'redirect') {
+    let redirect_url = block.properties.url || ''
+
+    if (typeof redirect_url !== 'string' || redirect_url === '') {
+      // fallback for trigger/action
+      if (
+        block.properties.hasOwnProperty('action')
+        && typeof block.properties.hasOwnProperty('action') === 'object'
+        && block.properties.action !== null
+        && block.properties.action.hasOwnProperty('url')
+        && typeof block.properties.action.url === 'string'
+      ) {
+        redirect_url = block.properties.action.url || ''
       }
-    } else if (
-      block.properties.action.type === 'open_url'
-      && typeof block.properties.action.url === 'string'
-      && block.properties.action.url !== ''
-    ) {
-      // go to mentioned url
-      res.redirect(block.properties.action.url)
-    } else {
-      // error (handles by client)
-      showClient(res, block)
     }
-  } else {
-    // error (handles by client)
-    showClient(res, block)
+
+    if (typeof redirect_url === 'string' && redirect_url !== '') {
+      performedAction = true
+      res.redirect(redirect_url)
+    }
   }
 
+  if (!performedAction) {
+    // render this block
+    const slug = normalizeSlug(group0) || group0
+    res.redirect(`/${slug}=${block._id}${group2}`)
+  }
 }
 
 let static_files_cache = null
@@ -466,7 +456,6 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
         if (block) {
           // group0 is a slug
           // redirect it accoringly
-          // TODO: Here is the place to add in the automations and actions for the path trigger.
           done = true
           redirectSlug({
             block,
