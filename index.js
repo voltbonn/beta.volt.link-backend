@@ -441,14 +441,21 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       next('route')
     }
   } else {
+    let done = false
     if (!!group0 && !!group1) {
       const block = await getBlockById(group1, headers)
-      showClient(res, block)
-    } else if (!!group0 && !group1) {
+      if (!!block && !!block._id) {
+        done = true
+        showClient(res, block)
+      }
+    }
+    
+    if (done === false && !!group0 && !group1) {
       // check if group0 is ID by finding it in the database
       const block = await getBlockById(group0, headers)
-      if (block) {
+      if (!!block && !!block._id) {
         // group0 is an ID
+        done = true
         showClient(res, block)
       } else {
         // group0 is not an id
@@ -459,6 +466,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
           // group0 is a slug
           // redirect it accoringly
           // TODO: Here is the place to add in the automations and actions for the path trigger.
+          done = true
           redirectSlug({
             block,
             req,
@@ -468,10 +476,13 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
           // captureGroupBeforeSeparator is probably a file. Not a slug or id.
           // So go to the next route.
           // The next route shows static files.
+          done = true
           next('route')
         }
       }
-    } else {
+    }
+    
+    if (done === false) {
       showClient(res)
     }
   }
