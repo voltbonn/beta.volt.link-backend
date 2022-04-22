@@ -453,7 +453,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
         // check if group0 is a slug
 
         const block = await getBlockBySlug(group0, headers)
-        if (block) {
+        if (!!block && !!block._id) {
           // group0 is a slug
           // redirect it accoringly
           done = true
