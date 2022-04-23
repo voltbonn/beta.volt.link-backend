@@ -358,9 +358,9 @@ async function redirectSlug(options, fallbackFunc) {
 
   if (!performedAction) {
     // render this block
-    // const slug = normalizeSlug(group0) || group0
-    // res.redirect(`/${slug}=${block._id}${group2}`)
-    throw new Error('No action performed.')
+    const slug = normalizeSlug(group0) || group0
+    res.redirect(`/${slug}=${block._id}${group2}`)
+    // throw new Error('No action performed.')
   }
 
   return true
@@ -437,7 +437,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
   } else {
     let done = false
 
-    if (done === false && typeof group0 === 'string' && group0 !== '') {
+    if (done === false && !!group0 && !group1) {
       const block = await getBlockBySlug(group0, headers)
       if (!!block && !!block._id) {
         // group0 is a slug
@@ -457,7 +457,16 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       }
     }
 
-    if (done === false && !!group0 && !!group1) {
+    if (done === false && !!group0) {
+      // check if group0 is ID by finding it in the database
+      const block = await getBlockById(group0, headers)
+      if (!!block && !!block._id) {
+        done = true
+        showClient(res, block)
+      }
+    }
+    
+     if (done === false && !!group1) {
       // check if group0 is ID by finding it in the database
       const block = await getBlockById(group1, headers)
       if (!!block && !!block._id) {
