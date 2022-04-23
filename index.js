@@ -341,7 +341,7 @@ function redirectSlug(options) {
       // fallback for trigger/action
       if (
         block.properties.hasOwnProperty('action')
-        && typeof block.properties.hasOwnProperty('action') === 'object'
+        && typeof block.properties.action === 'object'
         && block.properties.action !== null
         && block.properties.action.hasOwnProperty('url')
         && typeof block.properties.action.url === 'string'
