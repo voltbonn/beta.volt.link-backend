@@ -466,7 +466,6 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
     }
 
     if (done === false) {
-      done = true
       next('route')
       // showClient(res)
     }
