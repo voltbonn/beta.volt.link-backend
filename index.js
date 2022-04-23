@@ -360,8 +360,6 @@ async function redirectSlug(options) {
     res.redirect(`/${slug}=${block._id}${group2}`)
     // throw new Error('No action performed.')
   }
-
-  return true
 }
 
 let static_files_cache = null
@@ -440,18 +438,12 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       if (!!block && !!block._id) {
         // group0 is a slug
         // redirect it accoringly
+        done = true
         redirectSlug({
           block,
           req,
           res,
         })
-          .then(() => {
-            done = true
-          })
-          .catch(error => {
-            // console.error('error:', error)
-            done = false
-          })
       }
     }
 
