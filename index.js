@@ -312,7 +312,7 @@ function normalizeSlug(slug) {
   return null
 }
 
-async function redirectSlug(options, fallbackFunc) {
+async function redirectSlug(options) {
   const {
     block = {},
     res,
