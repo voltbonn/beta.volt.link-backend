@@ -312,7 +312,7 @@ function normalizeSlug(slug) {
   return null
 }
 
-function redirectSlug(options) {
+async function redirectSlug(options, fallbackFunc) {
   const {
     block = {},
     res,
@@ -358,9 +358,12 @@ function redirectSlug(options) {
 
   if (!performedAction) {
     // render this block
-    const slug = normalizeSlug(group0) || group0
-    res.redirect(`/${slug}=${block._id}${group2}`)
+    // const slug = normalizeSlug(group0) || group0
+    // res.redirect(`/${slug}=${block._id}${group2}`)
+    throw new Error('No action performed.')
   }
+
+  return true
 }
 
 let static_files_cache = null
@@ -433,47 +436,40 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
     }
   } else {
     let done = false
-    if (!!group0 && !!group1) {
+
+    if (done === false && typeof group0 === 'string' && group0 !== '') {
+      const block = await getBlockBySlug(group0, headers)
+      if (!!block && !!block._id) {
+        // group0 is a slug
+        // redirect it accoringly
+        redirectSlug({
+          block,
+          req,
+          res,
+        })
+          .then(() => {
+            done = true
+          })
+          .catch(error => {
+            // console.error('error:', error)
+            done = false
+          })
+      }
+    }
+
+    if (done === false && !!group0 && !!group1) {
+      // check if group0 is ID by finding it in the database
       const block = await getBlockById(group1, headers)
       if (!!block && !!block._id) {
         done = true
         showClient(res, block)
       }
     }
-    
-    if (done === false && !!group0 && !group1) {
-      // check if group0 is ID by finding it in the database
-      const block = await getBlockById(group0, headers)
-      if (!!block && !!block._id) {
-        // group0 is an ID
-        done = true
-        showClient(res, block)
-      } else {
-        // group0 is not an id
-        // check if group0 is a slug
 
-        const block = await getBlockBySlug(group0, headers)
-        if (!!block && !!block._id) {
-          // group0 is a slug
-          // redirect it accoringly
-          done = true
-          redirectSlug({
-            block,
-            req,
-            res,
-          })
-        } else {
-          // captureGroupBeforeSeparator is probably a file. Not a slug or id.
-          // So go to the next route.
-          // The next route shows static files.
-          done = true
-          next('route')
-        }
-      }
-    }
-    
     if (done === false) {
-      showClient(res)
+      done = true
+      next('route')
+      // showClient(res)
     }
   }
 })
