@@ -445,19 +445,19 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
           res,
         })
       }
-    }
 
-    if (done === false && !!group0) {
-      // check if group0 is ID by finding it in the database
-      const block = await getBlockById(group0, headers)
-      if (!!block && !!block._id) {
-        done = true
-        showClient(res, block)
+      if (done === false && !!group0) {
+        // check if group0 is ID by finding it in the database
+        const block = await getBlockById(group0, headers)
+        if (!!block && !!block._id) {
+          done = true
+          showClient(res, block)
+        }
       }
     }
     
     if (done === false && !!group1) {
-      // check if group0 is ID by finding it in the database
+      // check if group1 is ID by finding it in the database
       const block = await getBlockById(group1, headers)
       if (!!block && !!block._id) {
         done = true
