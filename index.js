@@ -330,18 +330,18 @@ async function redirectSlug(options) {
     block.properties = {}
   }
 
-  let performedAction = false
+  let performedRedirect = false
 
   if (block.type === 'redirect') {
     let redirect_url = block.properties.url || ''
 
     if (typeof redirect_url === 'string' && redirect_url !== '') {
-      performedAction = true
+      performedRedirect = true
       res.redirect(redirect_url)
     }
   }
 
-  if (!performedAction) {
+  if (!performedRedirect) {
     // render this block
     const slug = normalizeSlug(group0) || group0
     res.redirect(`/${slug}=${block._id}${group2}`)
