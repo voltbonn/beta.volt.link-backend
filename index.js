@@ -335,19 +335,6 @@ async function redirectSlug(options) {
   if (block.type === 'redirect') {
     let redirect_url = block.properties.url || ''
 
-    if (typeof redirect_url !== 'string' || redirect_url === '') {
-      // fallback for trigger/action
-      if (
-        block.properties.hasOwnProperty('action')
-        && typeof block.properties.action === 'object'
-        && block.properties.action !== null
-        && block.properties.action.hasOwnProperty('url')
-        && typeof block.properties.action.url === 'string'
-      ) {
-        redirect_url = block.properties.action.url || ''
-      }
-    }
-
     if (typeof redirect_url === 'string' && redirect_url !== '') {
       performedAction = true
       res.redirect(redirect_url)
