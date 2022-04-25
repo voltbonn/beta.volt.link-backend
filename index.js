@@ -345,7 +345,6 @@ async function redirectSlug(options) {
     // render this block
     const slug = normalizeSlug(group0) || group0
     res.redirect(`/${slug}=${block._id}${group2}`)
-    // throw new Error('No action performed.')
   }
 }
 
