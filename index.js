@@ -133,7 +133,7 @@ async function getBlockBySlug(slug, headers = {}) {
   return new Promise(resolve => {
     fetch((
       isDevEnvironment
-      ? 'http://localhost:4004/graphql/v1/'
+      ? 'http://0.0.0.0:4004/graphql/v1/'
       : 'https://api.volt.link/graphql/v1/'
     ), {
       method: 'POST',
@@ -175,7 +175,7 @@ async function getBlockById(id, headers = {}) {
   return new Promise(resolve => {
     fetch((
       isDevEnvironment
-      ? 'http://localhost:4004/graphql/v1/'
+      ? 'http://0.0.0.0:4004/graphql/v1/'
       : 'https://api.volt.link/graphql/v1/'
     ), {
       method: 'POST',
