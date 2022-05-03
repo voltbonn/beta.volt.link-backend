@@ -519,7 +519,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
         // show error page: now permission to view this block
         done = true
         res.redirect(`/error_403`)
-        res.send(`You are not allowed to view this page.`)
+        // res.send(`You are not allowed to view this page.`)
       } else {
         // show error page: the block does not exist
         done = true
