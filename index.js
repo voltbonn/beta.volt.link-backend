@@ -518,11 +518,13 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       if (existsAsId === true || existsAsSlug === true) {
         // show error page: now permission to view this block
         done = true
+        // TODO: don't redirect but show error page. to not change the URL.
         res.redirect(`/error_403`)
         // res.send(`You are not allowed to view this page.`)
       } else {
         // show error page: the block does not exist
         done = true
+        // TODO: don't redirect but show error page. to not change the URL.
         res.redirect(`/error_404`)
         // res.send(`The page does not exist.`)
       }
