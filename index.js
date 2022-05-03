@@ -194,22 +194,74 @@ async function getBlockById(id, headers = {}) {
         'content-type': 'application/json',
       }
     })
-    .then(async data => {
-      data = await data.json()
-      if (
-        data
-        && data.data
-        && data.data.block
-      ) {
-        resolve(data.data.block)
-      } else {
+      .then(async data => {
+        data = await data.json()
+        if (
+          data
+          && data.data
+          && data.data.block
+        ) {
+          resolve(data.data.block)
+        } else {
+          resolve(null)
+        }
+      })
+      .catch(error => {
+        console.error(error)
         resolve(null)
+      })
+  })
+}
+
+async function getSlugInfos(slug, headers = {}) {
+  return new Promise(resolve => {
+    fetch((
+      isDevEnvironment
+        ? 'http://0.0.0.0:4004/graphql/v1/'
+        : 'https://api.volt.link/graphql/v1/'
+    ), {
+      method: 'POST',
+      body: JSON.stringify({
+        query: `query checkSlug ($slug: String!) {
+          checkSlug (slug: $slug) {
+            existsAsSlug
+            existsAsId
+          }
+        }`,
+        variables: {
+          slug: slug,
+        }
+      }),
+      headers: {
+        ...headers,
+        'content-type': 'application/json',
       }
     })
-    .catch(error => {
-      console.error(error)
-      resolve(null)
-    })
+      .then(async data => {
+        data = await data.json()
+        if (
+          data
+          && data.data
+          && data.data.checkSlug
+        ) {
+          resolve({
+            existsAsSlug: data.data.checkSlug.existsAsSlug || false,
+            existsAsId: data.data.checkSlug.existsAsId || false,
+          })
+        } else {
+          resolve({
+            existsAsSlug: false,
+            existsAsId: false,
+          })
+        }
+      })
+      .catch(error => {
+        console.error('error for checkSlug:', error)
+        resolve({
+          existsAsSlug: false,
+          existsAsId: false,
+        })
+      })
   })
 }
 
@@ -451,6 +503,28 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       if (!!block && !!block._id) {
         done = true
         showClient(res, block)
+      }
+    }
+
+    if (
+      done === false
+      && typeof group0 === 'string' && group0 !== ''
+    ) {
+      const {
+        existsAsSlug = false,
+        existsAsId = false,
+      } = await getSlugInfos(group0, headers)
+
+      if (existsAsId === true || existsAsSlug === true) {
+        // show error page: now permission to view this block
+        done = true
+        res.redirect(`/error_403`)
+        res.send(`You are not allowed to view this page.`)
+      } else {
+        // show error page: the block does not exist
+        done = true
+        res.redirect(`/error_404`)
+        // res.send(`The page does not exist.`)
       }
     }
 
