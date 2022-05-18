@@ -213,6 +213,49 @@ async function getBlockById(id, headers = {}) {
   })
 }
 
+async function getBlocks(ids = [], slugs = [], headers = {}) {
+  return new Promise(resolve => {
+    fetch((
+      isDevEnvironment
+        ? 'http://0.0.0.0:4004/graphql/v1/'
+        : 'https://api.volt.link/graphql/v1/'
+    ), {
+      method: 'POST',
+      body: JSON.stringify({
+        query: `query ($ids: [String], $slugs: [String]) {
+          blocks (ids: $ids, slugs: $slugs) {
+      		  ${blockQuery}
+          }
+        }`,
+        variables: {
+          ids,
+          slugs,
+        }
+      }),
+      headers: {
+        ...headers,
+        'content-type': 'application/json',
+      }
+    })
+      .then(async data => {
+        data = await data.json()
+        if (
+          data
+          && data.data
+          && data.data.blocks
+        ) {
+          resolve(data.data.blocks)
+        } else {
+          resolve(null)
+        }
+      })
+      .catch(error => {
+        console.error(error)
+        resolve(null)
+      })
+  })
+}
+
 async function getSlugInfos(slug, headers = {}) {
   return new Promise(resolve => {
     fetch((
@@ -295,7 +338,7 @@ function getImageUrl(imageObj) {
   return ''
 }
 
-function showClient(res, block) {
+function showClient(res, blocks = []) {
   // send index file to show client
   const index_file_path = static_files_path + '/index.html'
 
@@ -309,32 +352,36 @@ function showClient(res, block) {
       let description = 'VoltLink is an information-hub about Volt Europa.'
       let coverphoto_url = ''
 
-      if (
-        block
-        && block.hasOwnProperty('properties')
-        && typeof block.properties === 'object'
-        && block.properties !== null
-      ) {
+      if (blocks.length > 0) {
+        const block = blocks[0]
+
         if (
-          block.properties.hasOwnProperty('text')
-          && typeof block.properties.text === 'string'
-          && block.properties.text.length > 0
+          block
+          && block.hasOwnProperty('properties')
+          && typeof block.properties === 'object'
+          && block.properties !== null
         ) {
-          title = block.properties.text
-          description = ''
+          if (
+            block.properties.hasOwnProperty('text')
+            && typeof block.properties.text === 'string'
+            && block.properties.text.length > 0
+          ) {
+            title = block.properties.text
+            description = ''
+          }
+
+          coverphoto_url = getImageUrl(block.properties.coverphoto)
+          if (!coverphoto_url) {
+            coverphoto_url = getImageUrl(block.properties.icon)
+          }
         }
 
-        coverphoto_url = getImageUrl(block.properties.coverphoto)
-        if (!coverphoto_url) {
-          coverphoto_url = getImageUrl(block.properties.icon)
+        if (coverphoto_url !== '') {
+          coverphoto_url = `https://api.volt.link/download_url?f=jpg&w=1000&h=1000&url=${encodeURIComponent(coverphoto_url)}`
         }
       }
 
-      if (coverphoto_url !== '') {
-        coverphoto_url = `https://api.volt.link/download_url?f=jpg&w=1000&h=1000&url=${encodeURIComponent(coverphoto_url)}`
-      }
-
-      const __SERVER_DATA__ = "JSON.parse(" + JSON.stringify(JSON.stringify({ preloaded_block: block })) + ")" // First stringify is to get arrays and objects represented correctly. Second stringify+parse to ease parsing of js code on the client.
+      const __SERVER_DATA__ = "JSON.parse(" + JSON.stringify(JSON.stringify({ preloaded_blocks: blocks })) + ")" // First stringify is to get arrays and objects represented correctly. Second stringify+parse to ease parsing of js code on the client.
 
       index_file = index_file
         .replace(/__META_TITLE__/g, title)
@@ -472,27 +519,18 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
     let done = false
 
     if (done === false && !!group0 && !group1) {
-      const block = await getBlockBySlug(group0, headers)
-      if (!!block && !!block._id) {
+      const blocks = await getBlocks([group0], [group0], headers)
+      if (!!blocks && blocks.length > 0) {
         // This gets called for "/:slug"
         // group0 is a slug
         // redirect it accoringly
         done = true
-        redirectSlug({
-          block,
-          req,
-          res,
-        })
-      }
-
-      if (done === false && !!group0) {
-        // This gets called for "/:id"
-        // check if group0 is ID by finding it in the database
-        const block = await getBlockById(group0, headers)
-        if (!!block && !!block._id) {
-          done = true
-          showClient(res, block)
-        }
+        showClient(res, blocks)
+        // redirectSlug({
+        //   block,
+        //   req,
+        //   res,
+        // })
       }
     }
 
@@ -502,7 +540,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       const block = await getBlockById(group1, headers)
       if (!!block && !!block._id) {
         done = true
-        showClient(res, block)
+        showClient(res, [block])
       }
     }
 
