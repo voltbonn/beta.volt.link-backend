@@ -548,24 +548,9 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       done === false
       && typeof group0 === 'string' && group0 !== ''
     ) {
-      const {
-        existsAsSlug = false,
-        existsAsId = false,
-      } = await getSlugInfos(group0, headers)
-
-      if (existsAsId === true || existsAsSlug === true) {
-        // show error page: now permission to view this block
-        done = true
-        // TODO: don't redirect but show error page. to not change the URL.
-        res.redirect(`/error_403`)
-        // res.send(`You are not allowed to view this page.`)
-      } else {
-        // show error page: the block does not exist
-        done = true
-        // TODO: don't redirect but show error page. to not change the URL.
-        res.redirect(`/error_404`)
-        // res.send(`The page does not exist.`)
-      }
+      // Error 403 and 404. These are checked in more detail on the client.
+      done = true
+      showClient(res)
     }
 
     if (done === false) {
