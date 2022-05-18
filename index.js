@@ -489,6 +489,10 @@ async function getIsStaticFile(slug) {
   }
 }
 
+app.get('/', async function (req, res, next) {
+  showClient(res) // call showClient to replace the default meta infos (__META_TITLE__, ...)
+})
+
 app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
   const headers = {
     cookie: req.headers.cookie, // for authentication
