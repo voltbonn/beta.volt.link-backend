@@ -529,15 +529,13 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
         // group0 is a slug
         // redirect it accoringly
 
-        if (blocks.length > 0) {
-          const block = blocks[0]
-          if (block.type === 'redirect') {
+        const block = blocks[0]
+        if (block.type === 'redirect') {
+          let redirect_url = block.properties.url || ''
+
+          if (typeof redirect_url === 'string' && redirect_url !== '') {
             done = true
-            redirectSlug({
-              block,
-              req,
-              res,
-            })
+            res.redirect(redirect_url)
           }
         }
 
@@ -552,19 +550,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       // This gets called for "/:slug=:id" 
       // check if group1 is ID by finding it in the database
       const block = await getBlockById(group1, headers)
-      if (!!block && !!block._id) {        
-        if (blocks.length > 0) {
-          const block = blocks[0]
-          if (block.type === 'redirect') {
-            done = true
-            redirectSlug({
-              block,
-              req,
-              res,
-            })
-          }
-        }
-
+      if (!!block && !!block._id) {
         if (done === false) {
           done = true
           showClient(res, blocks)
