@@ -6,6 +6,7 @@
     "express-rate-limit": "^5.3.0"
   },
   "scripts": {
-    "start": "cpus=`node cpus.js`; UV_THREADPOOL_SIZE=$cpus node index.js"
+    "start_with_all_cpus": "cpus=`node cpus.js`; UV_THREADPOOL_SIZE=$cpus node index.js",
+    "start": "node index.js"
   }
 }
