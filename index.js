@@ -510,9 +510,6 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
                 ? 'localhost'
                 : 'volt.link'
               const url = req.originalUrl
-              console.log('hostname', hostname)
-              console.log('url', url)
-              console.log('website', website)
 
               sendInitialStats({ website, url, hostname }, req.headers)
             } catch (error) {
