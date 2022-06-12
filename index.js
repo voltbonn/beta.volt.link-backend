@@ -10,6 +10,7 @@ const express = require('express')
 const RateLimit = require('express-rate-limit')
 
 const { fetch } = require('cross-fetch')
+const { sendInitialStats } = require('./stats.js')
 
 const fs = require('fs')
 
@@ -411,42 +412,6 @@ function normalizeSlug(slug) {
   return null
 }
 
-async function redirectSlug(options) {
-  const {
-    block = {},
-    res,
-    req,
-  } = options || {}
-
-  const group0 = req.params[0] // slug (or id if group1 is empty) // capture-group before separator
-  // const group1 = req.params[1] // id // capture-group after separator
-  const group2 = req.params[2] // suffix
-
-  if (!block.type) {
-    block.type = 'page'
-  }
-  if (!block.hasOwnProperty('properties')) {
-    block.properties = {}
-  }
-
-  let performedRedirect = false
-
-  if (block.type === 'redirect') {
-    let redirect_url = block.properties.url || ''
-
-    if (typeof redirect_url === 'string' && redirect_url !== '') {
-      performedRedirect = true
-      res.redirect(redirect_url)
-    }
-  }
-
-  if (!performedRedirect) {
-    // render this block
-    const slug = normalizeSlug(group0) || group0
-    res.redirect(`/${slug}=${block._id}${group2}`)
-  }
-}
-
 let static_files_cache = null
 async function getIsStaticFile(slug) {
   if (static_files_cache === null) {
@@ -535,6 +500,23 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
 
           if (typeof redirect_url === 'string' && redirect_url !== '') {
             done = true
+
+            // log redirect
+            try {
+              const website = isDevEnvironment
+                ? process.env.umami_volt_link_dev_id
+                : process.env.umami_volt_link_id
+              const hostname = isDevEnvironment
+                ? 'localhost'
+                : 'volt.link'
+              const url = req.originalUrl
+
+              sendInitialStats({ website, url, hostname }, req.headers)
+            } catch (e) {
+              console.error(e)
+            }
+
+            // redirect
             res.redirect(redirect_url)
           }
         }

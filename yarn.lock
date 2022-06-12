@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@fluent/langneg@^0.6.2":
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/@fluent/langneg/-/langneg-0.6.2.tgz#95e5261c27c7f3cb6237deb62aa1b7006a9bd17d"
+  integrity sha512-YF4gZ4sLYRQfctpUR2uhb5UyPUYY5n/bi3OaED/Q4awKjPjlaF8tInO3uja7pnLQcmLTURkZL7L9zxv2Z5NDwg==
+
 accepts@~1.3.8:
   version "1.3.8"
   resolved "https://registry.yarnpkg.com/accepts/-/accepts-1.3.8.tgz#0bf0be125b67014adcb0b0921e62db7bffe16b2e"
