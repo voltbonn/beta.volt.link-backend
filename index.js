@@ -504,8 +504,8 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
             // log redirect
             try {
               const website = isDevEnvironment
-                ? process.env.umami_volt_link_dev_id
-                : process.env.umami_volt_link_id
+                ? process.env.umami_id_dev
+                : process.env.umami_id_prod
               const hostname = isDevEnvironment
                 ? 'localhost'
                 : 'volt.link'
