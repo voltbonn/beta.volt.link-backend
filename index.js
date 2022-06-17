@@ -7,7 +7,7 @@ const url = require('url')
 const http = require('http')
 
 const express = require('express')
-const RateLimit = require('express-rate-limit')
+const rateLimit = require('express-rate-limit')
 
 const { fetch } = require('cross-fetch')
 const { sendInitialStats } = require('./stats.js')
@@ -51,9 +51,11 @@ function checkOrigin(origin){
 const app = express()
 
 // set up rate limiter: maximum of 100 requests per minute
-app.use(new RateLimit({
-  windowMs: 1*60*1000, // 1 minute
-  max: 1000, // requests per minute
+app.use(rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 1000, // Limit each IP to 1000 requests per `window` (here, per 1 minute)
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 })) // apply rate limiter to all requests
 
 app.use(express.json())
