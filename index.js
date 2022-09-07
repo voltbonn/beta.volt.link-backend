@@ -218,6 +218,9 @@ async function getBlockById(id, headers = {}) {
 
 async function getBlocks(ids = [], slugs = [], headers = {}) {
   return new Promise(resolve => {
+
+    ids = ids.filter(id => id.length === 24)
+
     console.log('query', `query ($ids: [ObjectID], $slugs: [String]) {
           blocks(ids: $ids, slugs: $slugs) {
       ${ blockQuery }
