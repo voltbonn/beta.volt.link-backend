@@ -225,7 +225,7 @@ async function getBlocks(ids = [], slugs = [], headers = {}) {
     ), {
       method: 'POST',
       body: JSON.stringify({
-        query: `query ($ids: [String], $slugs: [String]) {
+        query: `query ($ids: [ObjectID], $slugs: [String]) {
           blocks (ids: $ids, slugs: $slugs) {
       		  ${blockQuery}
           }
