@@ -13,7 +13,7 @@ const { fetch } = require('cross-fetch')
 const { sendInitialStats } = require('./stats.js')
 
 const fs = require('fs')
-
+const ObjectId = require('mongodb').ObjectId // just to check ObjectIDs
 
 const static_files_path = path.join(__dirname,
   isDevEnvironment
@@ -219,7 +219,7 @@ async function getBlockById(id, headers = {}) {
 async function getBlocks(ids = [], slugs = [], headers = {}) {
   return new Promise(resolve => {
 
-    ids = ids.filter(id => id.length === 24)
+    ids = ids.filter(id => ObjectId.isValid(id))
 
     fetch((
       isDevEnvironment
