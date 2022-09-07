@@ -491,14 +491,23 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
 
     if (done === false && !!group0 && !group1) {
       const blocks = await getBlocks([group0], [group0], headers)
+      console.log('')
+      console.log('blocksss', blocks)
+      console.log('')
       if (!!blocks && blocks.length > 0) {
         // This gets called for "/:slug"
         // group0 is a slug
         // redirect it accoringly
 
         const block = blocks[0]
+        console.log('')
+        console.log('block', block)
+        console.log('')
         if (block.type === 'redirect') {
           let redirect_url = block.properties.url || ''
+          console.log('')
+          console.log('redirect_url', redirect_url)
+          console.log('')
 
           if (typeof redirect_url === 'string' && redirect_url !== '') {
             done = true
