@@ -537,7 +537,7 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
       if (!!block && !!block._id) {
         if (done === false) {
           done = true
-          showClient(res, blocks)
+          showClient(res, [block])
         }
       }
     }
