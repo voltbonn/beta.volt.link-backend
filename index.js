@@ -13,7 +13,7 @@ const { fetch } = require('cross-fetch')
 const { sendInitialStats } = require('./stats.js')
 
 const fs = require('fs')
-
+const ObjectId = require('mongodb').ObjectId // just to check ObjectIDs
 
 const static_files_path = path.join(__dirname,
   isDevEnvironment
@@ -219,18 +219,7 @@ async function getBlockById(id, headers = {}) {
 async function getBlocks(ids = [], slugs = [], headers = {}) {
   return new Promise(resolve => {
 
-    ids = ids.filter(id => id.length === 24)
-
-    console.log('query', `query ($ids: [ObjectID], $slugs: [String]) {
-          blocks(ids: $ids, slugs: $slugs) {
-      ${ blockQuery }
-          }
-        }`)
-
-    console.log('variables', {
-      ids,
-      slugs,
-    })
+    ids = ids.filter(id => ObjectId.isValid(id))
 
     fetch((
       isDevEnvironment
@@ -255,7 +244,6 @@ async function getBlocks(ids = [], slugs = [], headers = {}) {
       }
     })
       .then(async data => {
-        console.log('data', data)
         data = await data.json()
         if (
           data
@@ -506,23 +494,14 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
 
     if (done === false && !!group0 && !group1) {
       const blocks = await getBlocks([group0], [group0], headers)
-      console.log('')
-      console.log('blocksss', blocks)
-      console.log('')
       if (!!blocks && blocks.length > 0) {
         // This gets called for "/:slug"
         // group0 is a slug
         // redirect it accoringly
 
         const block = blocks[0]
-        console.log('')
-        console.log('block', block)
-        console.log('')
         if (block.type === 'redirect') {
           let redirect_url = block.properties.url || ''
-          console.log('')
-          console.log('redirect_url', redirect_url)
-          console.log('')
 
           if (typeof redirect_url === 'string' && redirect_url !== '') {
             done = true
