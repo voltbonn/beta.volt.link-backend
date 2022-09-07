@@ -221,17 +221,6 @@ async function getBlocks(ids = [], slugs = [], headers = {}) {
 
     ids = ids.filter(id => id.length === 24)
 
-    console.log('query', `query ($ids: [ObjectID], $slugs: [String]) {
-          blocks(ids: $ids, slugs: $slugs) {
-      ${ blockQuery }
-          }
-        }`)
-
-    console.log('variables', {
-      ids,
-      slugs,
-    })
-
     fetch((
       isDevEnvironment
         ? 'http://0.0.0.0:4004/graphql/v1/'
@@ -255,7 +244,6 @@ async function getBlocks(ids = [], slugs = [], headers = {}) {
       }
     })
       .then(async data => {
-        console.log('data', data)
         data = await data.json()
         if (
           data
@@ -506,23 +494,14 @@ app.get(/^\/([^=/]*)(?:=?)([^=/]*)(.*)/, async function (req, res, next) {
 
     if (done === false && !!group0 && !group1) {
       const blocks = await getBlocks([group0], [group0], headers)
-      console.log('')
-      console.log('blocksss', blocks)
-      console.log('')
       if (!!blocks && blocks.length > 0) {
         // This gets called for "/:slug"
         // group0 is a slug
         // redirect it accoringly
 
         const block = blocks[0]
-        console.log('')
-        console.log('block', block)
-        console.log('')
         if (block.type === 'redirect') {
           let redirect_url = block.properties.url || ''
-          console.log('')
-          console.log('redirect_url', redirect_url)
-          console.log('')
 
           if (typeof redirect_url === 'string' && redirect_url !== '') {
             done = true
