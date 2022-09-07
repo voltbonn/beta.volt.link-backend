@@ -218,6 +218,17 @@ async function getBlockById(id, headers = {}) {
 
 async function getBlocks(ids = [], slugs = [], headers = {}) {
   return new Promise(resolve => {
+    console.log('query', `query ($ids: [ObjectID], $slugs: [String]) {
+          blocks(ids: $ids, slugs: $slugs) {
+      ${ blockQuery }
+          }
+        }`)
+
+    console.log('variables', {
+      ids,
+      slugs,
+    })
+
     fetch((
       isDevEnvironment
         ? 'http://0.0.0.0:4004/graphql/v1/'
@@ -241,6 +252,7 @@ async function getBlocks(ids = [], slugs = [], headers = {}) {
       }
     })
       .then(async data => {
+        console.log('data', data)
         data = await data.json()
         if (
           data
