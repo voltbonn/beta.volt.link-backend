@@ -117,6 +117,7 @@ const blockQuery = `
       computed {
         roles
         inherited_block_permissions
+        contentAsPlaintext
       }
     }
   }
@@ -129,6 +130,7 @@ const blockQuery = `
   computed {
     roles
     inherited_block_permissions
+    contentAsPlaintext
   }
 `
 
