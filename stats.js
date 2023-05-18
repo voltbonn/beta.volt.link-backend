@@ -16,9 +16,9 @@ function trackPageview(payload, headers) {
   })
 
   const req = https.request({
-    hostname: 'umami.qiekub.org',
+    hostname: 'umami.volt.link',
     port: 443,
-    path: '/api/collect',
+    path: '/api/send',
     method: 'POST',
     headers: {
       'User-Agent': headers['user-agent'] || '',
@@ -37,8 +37,8 @@ function trackEvent(payload, headers) {
     payload: {
       website: '', // 'your-website-id',
       url: '/',
-      event_type: 'custom', // 'click',
-      event_value: '', // 'signup-button',
+      name: 'custom', // 'click',
+      // event_value: '', // 'signup-button',
       hostname: '', // 'your-hostname',
       language: '', // 'en-US',
       screen: '1920x1080',
@@ -48,9 +48,9 @@ function trackEvent(payload, headers) {
   })
 
   const req = https.request({
-    hostname: 'umami.qiekub.org',
+    hostname: 'umami.volt.link',
     port: 443,
-    path: '/api/collect',
+    path: '/api/send',
     method: 'POST',
     headers: {
       'User-Agent': headers['user-agent'] || '',
