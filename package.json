@@ -5,7 +5,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-rate-limit": "^6.4.0",
-    "mongodb": "^4.9.1"
+    "mongodb": "^4.17.0"
   },
   "scripts": {
     "start_with_all_cpus": "cpus=`node cpus.js`; UV_THREADPOOL_SIZE=$cpus node index.js",
